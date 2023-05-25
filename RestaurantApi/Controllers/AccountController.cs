@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using RestaurantApi.Dtos;
 using RestaurantApi.Dtos.Create;
 using RestaurantApi.Services.Interfaces;
 
@@ -21,5 +22,12 @@ namespace RestaurantApi.Controllers
             _accountService.RegisterUser(dto);
             return Ok();
         }
+        
+        [HttpPost("login")]
+        public ActionResult LoginUser([FromBody]LoginDto loginDto) 
+        {
+            string token = _accountService.GenerateJwt(loginDto);
+            return Ok(token);
+        }
     }
-}
+} 
