@@ -3,6 +3,7 @@ using RestaurantApi.Dtos;
 using RestaurantApi.Dtos.Create;
 using RestaurantApi.Dtos.Update;
 using RestaurantApi.Entities;
+using System.Security.Claims;
 
 namespace RestaurantApi.Services.Interfaces
 {

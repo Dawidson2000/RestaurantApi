@@ -8,6 +8,7 @@ using RestaurantApi.Dtos.Create;
 using RestaurantApi.Dtos.Update;
 using RestaurantApi.Entities;
 using RestaurantApi.Services.Interfaces;
+using System.Security.Claims;
 
 namespace RestaurantApi.Controllers
 {
@@ -42,6 +43,7 @@ namespace RestaurantApi.Controllers
         [Authorize(Roles = "Admin,Manager")]
         public ActionResult CreateRestaurant([FromBody] CreateRestaurantDto dto)
         {
+            var userId = int.Parse(User.FindFirst(c => c.Type == ClaimTypes.NameIdentifier).Value);
             var restaurant = _service.Create(dto);
             return Created($"api/restaurant/{restaurant.Id}", null);
         }
