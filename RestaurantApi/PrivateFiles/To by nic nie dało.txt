@@ -1,0 +1,281 @@
+import React from 'react';
+import { Col, Form, Row } from 'reactstrap';
+import { FaExpand, FaSearchMinus, FaSearchPlus, FaUndo } from 'react-icons/fa';
+import { FormattedMessage, injectIntl, IntlShape } from 'react-intl';
+import { connect, ConnectedProps } from 'react-redux';
+import {
+    AvailabilityActivityIcon,
+    DrivingActivityIcon,
+    NoneActivityIcon,
+    RestActivityIcon,
+    WorkActivityIcon,
+} from '../../../../../assets/icons/icons';
+import { ActivityType } from 'core/dictionaries/common/activityType';
+import { tachographDiscActionCreators } from 'state/global/tachographDisc/actionTypes';
+import { ApplicationState } from 'state/ApplicationState';
+import { D3ConstantsDefaults } from 'core/domainModels/tachographChart/chartConfiguration';
+import { DiscChartMode } from '../models/discChartMode';
+import DiscChartComponent from './discChart/discChartComponent';
+import { TachoThemedButton } from 'app/components/TachoButton';
+import ResizeDetector from 'react-resize-detector';
+import {
+    BlockInput,
+    SelectInput,
+    LabelPosition,
+    NumericInput,
+    Item,
+    Button,
+    Icon,
+    InlineInput,
+    InputPositioner,
+    Label,
+} from 'tacho-ui';
+import { getKeyFromEnum } from 'core/helpers/enumUtils';
+
+interface DiscViewComponentProps {
+    selectedActivityFrontId: string | undefined;
+    editedDiscFrontId: string;
+    setSelectedActivity: (frontId: string) => void;
+}
+
+interface ConnectedDiscViewComponentProps extends ReduxProps, DiscViewComponentProps {
+    intl: IntlShape;
+}
+
+interface DiscViewComponentState {
+    discChartScale: number;
+    discChartMode: DiscChartMode;
+    activityAddingMode: ActivityType | undefined;
+    activityToAddLengthMin: number;
+}
+
+export class DiscViewComponent extends React.Component<ConnectedDiscViewComponentProps, DiscViewComponentState> {
+    public constructor(props: ConnectedDiscViewComponentProps) {
+        super(props);
+        this.state = {
+            discChartScale: 1,
+            discChartMode: DiscChartMode.dcmActivities,
+            activityAddingMode: undefined,
+            activityToAddLengthMin: 5,
+        };
+    }
+
+    public render(): JSX.Element {
+        return (
+            <div className="discViewComponent">
+                <Row className="contentText justify-content-between">
+                    <Col sm={4} className="d-flex align-items-center">
+                        <Form className="mainForm w-100">
+                            <BlockInput>
+                                <SelectInput
+                                    label={this.props.intl.formatMessage({ id: 'tachographDiscView' })}
+                                    value={this.props.intl.formatMessage({ id: DiscChartMode[this.state.discChartMode] })}
+                                    options={Object.values(DiscChartMode).map(mode => ({
+                                        id: mode,
+                                        label: this.props.intl.formatMessage({ id: mode }),
+                                    }))}
+                                    onChange={newValue =>
+                                        this.setState({
+                                            discChartMode: getKeyFromEnum(Object.entries(DiscChartMode), (newValue as Item).id),
+                                        })
+                                    }
+                                />
+                            </BlockInput>
+                        </Form>
+                    </Col>
+                    <Col sm={8} className="d-flex align-items-center justify-content-end">
+                        <Row className="align-items-center">
+                            <Col sm={8} className="d-flex justify-content-end align-items-center">
+                                <InputPositioner pb={5} pt={5}>
+                                    <span className="align-self-center">
+                                        <FormattedMessage id="tachographDiscViewAdding" />
+                                    </span>
+                                    <Label
+                                        content={this.props.intl.formatMessage({ id: 'tachographDiscViewAdding' })}
+                                        labelLength={-1}
+                                    />
+                                    <InlineInput proportion={-1} gap={5}>
+                                        {/* <TachoThemedButton
+                                    icon={DrivingActivityIcon}
+                                    theme="secondary"
+                                    disabled={this.state.discChartMode === DiscChartMode.dcmDistance}
+                                    active={this.state.activityAddingMode === ActivityType.Driving}
+                                    onClick={() => this.onActivityAddClick(ActivityType.Driving)}
+                                /> */}
+                                        <Button
+                                            theme="secondaryToolbar"
+                                            icon={Icon.Add}
+                                            disabled={this.state.discChartMode === DiscChartMode.dcmDistance}
+                                            onClick={() => this.onActivityAddClick(ActivityType.Driving)}
+                                        />
+                                        {/* <TachoThemedButton
+                                    icon={WorkActivityIcon}
+                                    theme="secondary"
+                                    disabled={this.state.discChartMode === DiscChartMode.dcmDistance}
+                                    active={this.state.activityAddingMode === ActivityType.Work}
+                                    onClick={() => this.onActivityAddClick(ActivityType.Work)}
+                                /> */}
+                                        <Button
+                                            theme="secondaryToolbar"
+                                            icon={Icon.Add}
+                                            disabled={this.state.discChartMode === DiscChartMode.dcmDistance}
+                                            onClick={() => this.onActivityAddClick(ActivityType.Work)}
+                                        />
+                                        {/* <TachoThemedButton
+                                    icon={AvailabilityActivityIcon}
+                                    theme="secondary"
+                                    disabled={this.state.discChartMode === DiscChartMode.dcmDistance}
+                                    active={this.state.activityAddingMode === ActivityType.Availability}
+                                    onClick={() => this.onActivityAddClick(ActivityType.Availability)}
+                                /> */}
+                                        <Button
+                                            theme="secondaryToolbar"
+                                            icon={Icon.Add}
+                                            disabled={this.state.discChartMode === DiscChartMode.dcmDistance}
+                                            onClick={() => this.onActivityAddClick(ActivityType.Availability)}
+                                        />
+                                        {/* <TachoThemedButton
+                                    icon={RestActivityIcon}
+                                    theme="secondary"
+                                    disabled={this.state.discChartMode === DiscChartMode.dcmDistance}
+                                    active={this.state.activityAddingMode === ActivityType.Rest}
+                                    onClick={() => this.onActivityAddClick(ActivityType.Rest)}
+                                /> */}
+                                        <Button
+                                            theme="secondaryToolbar"
+                                            icon={Icon.Add}
+                                            disabled={this.state.discChartMode === DiscChartMode.dcmDistance}
+                                            onClick={() => this.onActivityAddClick(ActivityType.Rest)}
+                                        />
+                                        {/* <TachoThemedButton
+                                    icon={NoneActivityIcon}
+                                    theme="secondary"
+                                    disabled={this.state.discChartMode === DiscChartMode.dcmDistance}
+                                    active={this.state.activityAddingMode === ActivityType.NoData}
+                                    onClick={() => this.onActivityAddClick(ActivityType.NoData)}
+                                /> */}
+                                        <Button
+                                            theme="secondaryToolbar"
+                                            icon={Icon.Add}
+                                            disabled={this.state.discChartMode === DiscChartMode.dcmDistance}
+                                            onClick={() => this.onActivityAddClick(ActivityType.NoData)}
+                                        />
+                                    </InlineInput>
+                                </InputPositioner>
+                            </Col>
+                            <Col sm={4}>
+                                <Form className="mainForm">
+                                    <BlockInput>
+                                        <NumericInput
+                                            className="mb-0 w-100"
+                                            label={this.props.intl.formatMessage({ id: 'tachographDiscViewMinutes' })}
+                                            labelPosition={LabelPosition.Right}
+                                            value={this.state.activityToAddLengthMin}
+                                            min={1}
+                                            max={30}
+                                            onChange={e => this.setState({ activityToAddLengthMin: e })}
+                                        />
+                                    </BlockInput>
+                                </Form>
+                            </Col>
+                        </Row>
+                    </Col>
+                </Row>
+                <ResizeDetector>
+                    {({ width, height }) => (
+                        <div className="d-flex flex-grow-1 justify-content-center" style={{ overflowY: 'hidden' }}>
+                            <DiscChartComponent
+                                width={width || 0}
+                                height={height || 0}
+                                scale={this.state.discChartScale}
+                                editedDiscFrontId={this.props.editedDiscFrontId}
+                                chartMode={this.state.discChartMode}
+                                selectedActivityFrontId={this.props.selectedActivityFrontId}
+                                activityAddingMode={this.state.activityAddingMode}
+                                futureActivityDurationMin={this.state.activityToAddLengthMin}
+                                setSelectedActivity={frontId => this.props.setSelectedActivity(frontId)}
+                            />
+                        </div>
+                    )}
+                </ResizeDetector>
+
+                <Row className="contentText">
+                    <Col sm={6}>
+                        <Row>
+                            <Col sm={8}>
+                                <Form className="mainForm">
+                                    <BlockInput>
+                                        <NumericInput
+                                            className="mb-0"
+                                            label={this.props.intl.formatMessage({ id: 'tachographDiscViewTimeCorrection' })}
+                                            value={this.props.editedDisc?.scanMetadata?.chartDataOffsetMin || 0}
+                                            min={-1439}
+                                            max={1439}
+                                            onChange={newValue => this.onMinutesOffsetChanged(newValue)}
+                                        />
+                                    </BlockInput>
+                                </Form>
+                            </Col>
+                            <Col sm="auto" className="d-flex align-items-center">
+                                <FormattedMessage id="tachographDiscViewMinutes" />
+                            </Col>
+                        </Row>
+                    </Col>
+                    <Col sm={6} className="d-flex justify-content-end">
+                        <InputPositioner pb={5} pt={5}>
+                            <InlineInput proportion={-1} gap={5}>
+                                <Button theme="secondaryToolbar" icon={Icon.MagnifyPlus} onClick={() => this.onScaleUp()} />
+                                <Button theme="secondaryToolbar" icon={Icon.MagnifyMinus} onClick={() => this.onScaleDown()} />
+                                <Button theme="secondaryToolbar" icon={Icon.Refresh} onClick={() => this.onResetScale()} />
+                                <Button theme="secondaryToolbar" icon={Icon.Expand} disabled />
+                            </InlineInput>
+                        </InputPositioner>
+                    </Col>
+                </Row>
+            </div>
+        );
+    }
+
+    private onActivityAddClick(activityType: ActivityType): void {
+        if (this.state.activityAddingMode === activityType) {
+            this.setState({ activityAddingMode: undefined });
+        } else {
+            this.setState({ activityAddingMode: activityType });
+        }
+    }
+
+    private onResetScale(): void {
+        this.setState({ discChartScale: 1 });
+    }
+
+    private onScaleDown(): void {
+        let newScale = this.state.discChartScale / D3ConstantsDefaults.ChartScaleFactor;
+        newScale = newScale < 1 ? 1 : newScale;
+        this.setState({ discChartScale: newScale });
+    }
+
+    private onScaleUp(): void {
+        this.setState({ discChartScale: this.state.discChartScale * D3ConstantsDefaults.ChartScaleFactor });
+    }
+
+    private onMinutesOffsetChanged(newOffsetMin: number): void {
+        if (newOffsetMin === undefined || newOffsetMin === null || isNaN(newOffsetMin)) {
+            return;
+        }
+        this.props.onOffsetChartData(this.props.editedDiscFrontId, newOffsetMin);
+    }
+}
+
+const mapStateToProps = (state: ApplicationState, ownProps: DiscViewComponentProps) => ({
+    editedDisc: state.tachographDisc.editedTachograpghDiscs[ownProps.editedDiscFrontId],
+});
+
+const mapDispatchToProps = (dispatch: any) => ({
+    onOffsetChartData: (tachoModelFrontId: string, newOffsetMin: number) =>
+        dispatch(tachographDiscActionCreators.offsetChartData(tachoModelFrontId, newOffsetMin)),
+});
+
+const connector = connect(mapStateToProps, mapDispatchToProps);
+type ReduxProps = ConnectedProps<typeof connector>;
+
+export default connector(injectIntl(DiscViewComponent));
