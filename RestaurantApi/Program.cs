@@ -38,6 +38,16 @@ builder.Services.AddScoped<TimeRequestMiddleware>();
 builder.Services.AddScoped<Stopwatch>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<IValidator<CreateUserDto>, CreateUserDtoValidator>();
+builder.Services.AddCors(options => 
+{
+    options.AddPolicy("FrontEndClient", policyBuilder => 
+    {
+        policyBuilder.AllowAnyMethod()
+            .AllowAnyHeader()
+            .WithOrigins(builder.Configuration["AllowedOrigins"]);
+    });
+});
+
 
 var authenticationSettings = new AuthenticationSettings();
 builder.Configuration.GetSection("Authentication").Bind(authenticationSettings);
@@ -77,6 +87,7 @@ var app = builder.Build();
 
 var scope = app.Services.CreateScope();
 var seeder = scope.ServiceProvider.GetRequiredService<RestaurantSeeder>();
+app.UseCors("FrontEndClient");
 seeder.Seed();
 
 app.UseMiddleware<ErrorHandlingMiddleware>();
