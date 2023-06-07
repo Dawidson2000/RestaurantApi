@@ -25,6 +25,7 @@ namespace RestaurantApi.Controllers
 
         [HttpGet]
         [Authorize(Policy = "AtLeast20")]
+        [Authorize(Policy = "AtLeast2CreatedRestaurant")]
         public ActionResult<IEnumerable<Restaurant>> GetAll()
         {
             var restaurants = _service.GetAll();
