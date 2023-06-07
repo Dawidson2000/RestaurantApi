@@ -9,6 +9,7 @@ namespace RestaurantApi.Controllers
     public class FileController : ControllerBase
     {
         [HttpGet]
+        [ResponseCache(Duration = 1200, VaryByQueryKeys = new[] { "fileName" })]
         public ActionResult GetFile([FromQuery] string fileName)
         {
             var rootPath = Directory.GetCurrentDirectory();
@@ -31,21 +32,21 @@ namespace RestaurantApi.Controllers
         }
 
         [HttpPost]
-        public ActionResult Upload([FromForm]IFormFile file) 
+        public ActionResult Upload([FromForm] IFormFile file)
         {
-            if (file != null && file.Length > 0) 
+            if (file != null && file.Length > 0)
             {
                 var rootPath = Directory.GetCurrentDirectory();
                 var fullPath = $"{rootPath}/PrivateFiles/{file.FileName}";
 
-                using(var stream = new FileStream(fullPath, FileMode.Create)) 
+                using (var stream = new FileStream(fullPath, FileMode.Create))
                 {
                     file.CopyTo(stream);
                 }
 
                 return Ok();
             }
-            return BadRequest();    
+            return BadRequest();
         }
     }
 }
