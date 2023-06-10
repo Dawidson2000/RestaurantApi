@@ -7,6 +7,7 @@ using RestaurantApi.Dtos;
 using RestaurantApi.Dtos.Create;
 using RestaurantApi.Dtos.Update;
 using RestaurantApi.Entities;
+using RestaurantApi.Models.Queries;
 using RestaurantApi.Services.Interfaces;
 using System.Security.Claims;
 
@@ -26,9 +27,9 @@ namespace RestaurantApi.Controllers
         [HttpGet]
         [Authorize(Policy = "AtLeast20")]
         [Authorize(Policy = "AtLeast2CreatedRestaurant")]
-        public ActionResult<IEnumerable<Restaurant>> GetAll()
+        public ActionResult<IEnumerable<Restaurant>> GetAll([FromQuery] RestaurantQuery query)
         {
-            var restaurants = _service.GetAll();
+            var restaurants = _service.GetAll(query);
             return Ok(restaurants);
         }
 

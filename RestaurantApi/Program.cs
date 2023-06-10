@@ -10,6 +10,7 @@ using RestaurantApi.Authorization;
 using RestaurantApi.Dtos.Create;
 using RestaurantApi.Entities;
 using RestaurantApi.Middleware;
+using RestaurantApi.Models.Queries;
 using RestaurantApi.Models.Validators;
 using RestaurantApi.Services;
 using RestaurantApi.Services.Interfaces;
@@ -38,6 +39,7 @@ builder.Services.AddScoped<TimeRequestMiddleware>();
 builder.Services.AddScoped<Stopwatch>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<IValidator<CreateUserDto>, CreateUserDtoValidator>();
+builder.Services.AddScoped<IValidator<RestaurantQuery>, RestaurantQueryValidator>();
 builder.Services.AddCors(options => 
 {
     options.AddPolicy("FrontEndClient", policyBuilder => 
